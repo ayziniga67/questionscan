@@ -334,8 +334,13 @@
         const fullPageText = content.items.map(item => item.str).join(' ').toUpperCase();
         
         // BYPASS TRAP: If it's an instructions page containing generic rules rubrics, skip completely
-        if (fullPageText.includes("GENERIC MARKING PRINCIPLE") || fullPageText.includes("MARKING PRINCIPLES")) 
-          (i <= 4 & parseInt(targetQ) >= 5)) {
+        if (fullPageText.includes("ANNOTATION") || 
+            fullPageText.includes("ABBREVIATION") || 
+            fullPageText.includes("SPECIFIC MARKING INSTRUCTIONS") ||
+            fullPageText.includes("GENERIC MARKING PRINCIPLE") ||
+            fullPageText.includes("MARK SCHEME NOTES") ||
+            fullPageText.includes("GENERAL INSTRUCTIONS") ||
+            (i <= 4 && parseInt(targetQ) >= 5)) { // <-- Your hard math bypass rule
           continue;
         }
         
