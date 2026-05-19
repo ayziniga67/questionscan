@@ -334,7 +334,8 @@
         const fullPageText = content.items.map(item => item.str).join(' ').toUpperCase();
         
         // BYPASS TRAP: If it's an instructions page containing generic rules rubrics, skip completely
-        if (fullPageText.includes("GENERIC MARKING PRINCIPLE") || fullPageText.includes("MARKING PRINCIPLES")) {
+        if (fullPageText.includes("GENERIC MARKING PRINCIPLE") || fullPageText.includes("MARKING PRINCIPLES")) 
+          (i <= 4 && parseInt(targetQ) >= 5)) {
           continue;
         }
         
