@@ -283,7 +283,25 @@
     const pap = document.getElementById('pap-input').value.trim();
     const targetQ = document.getElementById('q-input').value.trim() || "1";
 
-    const msUrl = `https://pastpapers.papacambridge.com/directories/CAIE/CAIE-pastpapers/upload/${sub}_${seas}${yr}_ms_${pap}.pdf`;
+    // 1. ADD THIS LOOKUP DICTIONARY FOR XTREMEPAPERS FOLDERS
+    const subjectFolders = {
+      "9709": "Mathematics%20(9709)",
+      "9702": "Physics%20(9702)",
+      "9701": "Chemistry%20(9701)",
+      "9700": "Biology%20(9700)",
+      "9618": "Computer%20Science%20(9618)",
+      "9708": "Economics%20(9708)",
+      "9706": "Accounting%20(9706)",
+      "9609": "Business%20(9609)"
+    };
+
+    // Get the folder name dynamically, fallback to guessing the format if not in the list
+    const folderName = subjectFolders[sub] || `${sub}`; 
+
+    // 2. UPDATE THE URL TO USE THE DYNAMIC FOLDER NAME
+    const msUrl = `https://papers.xtremepape.rs/CAIE/AS%20and%20A%20Level/${folderName}/${sub}_${seas}${yr}_ms_${pap}.pdf`;
+
+    
 
     document.getElementById('viewer-wrap').style.display = 'block';
     document.getElementById('paper-id').innerText = `${sub} | ${seas.toUpperCase()}${yr} | P${pap} | Q${targetQ}`;
@@ -342,37 +360,32 @@
           continue;
         }
 
-        // Gather all elements inside the primary left column lanes (< 140 width bound on x-axis)
+        // Gather all elements inside the primary left column lanes (< 160 width bound on x-axis)
         const leftColumnList = content.items.filter(item => {
           if (!item || typeof item.str !== 'string') return false;
           const itemX = item.transform ? item.transform[4] : 0;
           const itemY = item.transform ? item.transform[5] : 0;
           // Filter out header/footer noise on the y-axis (stays inside body)
-          return itemX < 140 && itemY > 50 && itemY < 790;
+          return itemX >= 0 && itemX < 160 && itemY > 30 && itemY < 810;
         });
 
         // Scan the collected column items list one by one
         for (let item of leftColumnList) {
           const rawStr = item.str.trim();
+          if (!rawStr) continue;
           
           if (/page|mark|total|subject|comment|cambridge/i.test(rawStr)) {
             continue;
           }
 
-          // Regex prefix boundary: Look for target question number followed by non-digits
-          const targetNum = parseInt(targetQ);
-          const regex = new RegExp('^' + targetNum + '(?!\\d)');
+          // Strip headers out of the string before matching to catch dynamic table components
+          let cleanStr = rawStr.toUpperCase().replace(/QUESTION/g, '').trim();
+          const boundaryRegex = new RegExp('(^|\\b)' + targetQ + '(\\b|\\(|\\)|$)');
           
-          if (regex.test(rawStr)) {
-            // Confirm the very first segment of the text token matches our dynamic sequence
-            const firstToken = rawStr.split(/\s+/)[0];
-            const firstWordRegex = new RegExp('^' + targetNum + '([A-Za-z]|\\(|\\.|\\)|$)');
-            
-            if (firstWordRegex.test(firstToken)) {
-              matchedPage = i;
-              foundMatch = true;
-              break; 
-            }
+          if (boundaryRegex.test(cleanStr)) {
+            matchedPage = i;
+            foundMatch = true;
+            break;
           }
         }
       }
